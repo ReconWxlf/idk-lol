@@ -1,0 +1,113 @@
+local LocalPlayer = game:GetService("Players").LocalPlayer
+local Client = getsenv(game.Players.LocalPlayer.PlayerGui.Client)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+local allSkins = {
+   {'AK47_Eve'},
+   {'AK47_Godess'},
+   {'AK47_Hallows'},
+   {'AK47_Hypersonic'},
+   {'AK47_Mean Green'},
+   {'AK47_Outlaws'},
+   {'AK47_Scapter'},
+   {'AK47_Variant Camo'},
+   {'AWP_Blastech'},
+   {'AWP_Dragon'},
+   {'AWP_Hika'},
+   {'AWP_Scapter'},
+   {'AWP_Weeb'},
+   {'Bayonet_Hallows'},
+   {'Bayonet_RSL'},
+   {'Bayonet_Sapphire'},
+   {'Bayonet_Twitch'},
+   {'Butterfly Knife_Freedom'},
+   {'Butterfly Knife_Hallows'},
+   {'Butterfly Knife_Scapter'},
+   {'Butterfly Knife_Twitch'},
+   {'DesertEagle_DropX'},
+   {'DesertEagle_Independence'},
+   {'Famas_MK11'},
+   {'Glock_Day Dreamer'},
+   {'Glock_RSL'},
+   {'Glock_Rush'},
+   {'Glock_Scapter'},
+   {'Glock_Underwater'},
+   {'Glock_White Sauce'},
+   {'Karambit_Death Wish'},
+   {'Karambit_Hallows'},
+   {'Karambit_Scapter'},
+   {'Karambit_Twitch'},
+   {'M4A1_Animatic'},
+   {'M4A1_Heavens Gate'},
+   {'M4A4_BOT[S]'},
+   {'M4A4_Endline'},
+   {'M4A4_King'},
+   {'P250_TC250'},
+   {'SG_DropX'},
+   {'SG_Yltude'},
+   {'Scout_Neon Regulation'},
+   {'USP_Nighttown'},
+   {'USP_Yellowbelly'},
+   {'XM_MK11'},
+   {'Fingerless Glove_Scapter'},
+   {'Sports Glove_Weeb'},
+   {'Sports Glove_CottonTail'},
+   {'Sports Glove_RSL'},
+}
+
+local isUnlocked
+
+local mt = getrawmetatable(game)
+local oldNamecall = mt.__namecall
+setreadonly(mt, false)
+
+local isUnlocked
+
+mt.__namecall = newcclosure(function(self, ...)
+   local args = {...}
+   if getnamecallmethod() == "InvokeServer" and tostring(self) == "Hugh" then
+       return
+   end
+   if getnamecallmethod() == "FireServer" then
+       if args[1] == LocalPlayer.UserId then
+           return
+       end
+       if string.len(tostring(self)) == 38 then
+           if not isUnlocked then
+               isUnlocked = true
+               for i,v in pairs(allSkins) do
+                   local doSkip
+                   for i2,v2 in pairs(args[1]) do
+                       if v[1] == v2[1] then
+                           doSkip = true
+                       end
+                   end
+                   if not doSkip then
+                       table.insert(args[1], v)
+                   end
+               end
+           end
+           return
+       end
+       if tostring(self) == "DataEvent" and args[1][4] then
+           local currentSkin = string.split(args[1][4][1], "_")[2]
+           if args[1][2] == "Both" then
+               LocalPlayer["SkinFolder"]["CTFolder"][args[1][3]].Value = currentSkin
+               LocalPlayer["SkinFolder"]["TFolder"][args[1][3]].Value = currentSkin
+           else
+               LocalPlayer["SkinFolder"][args[1][2] .. "Folder"][args[1][3]].Value = currentSkin
+           end
+       end
+   end
+   return oldNamecall(self, ...)
+end)
+   
+setreadonly(mt, true)
+
+Client.CurrentInventory = allSkins
+
+local TClone, CTClone = LocalPlayer.SkinFolder.TFolder:Clone(), game.Players.LocalPlayer.SkinFolder.CTFolder:Clone()
+LocalPlayer.SkinFolder.TFolder:Destroy()
+LocalPlayer.SkinFolder.CTFolder:Destroy()
+TClone.Parent = LocalPlayer.SkinFolder
+CTClone.Parent = LocalPlayer.SkinFolder
